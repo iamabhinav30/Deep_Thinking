@@ -5,7 +5,7 @@
 
 - [Question_1 : *Why* `setTimeout()` is a **macrotask** and `Promise.resolve()` is a microtask — without any fluff, no hallucination.](#question_1)
 
-- [Scenario 2 : A fetch call returns much slower only on Chrome Mobile. How do you profile the event loop + microtasks to find starvation?](#scenario_2)
+- [Scenario_2 : A fetch call returns much slower only on Chrome Mobile. How do you profile the event loop + microtasks to find starvation?](#scenario_2)
 
 
 # Scenario_1 : 
@@ -270,8 +270,7 @@ Each cycle:
 
 
 
-# Scenario_2 :
-
+# Scenario_2 : 
 **A fetch call returns much slower only on Chrome Mobile. How do you profile the event loop + microtasks to find starvation?**
 
 Chrome Mobile is more vulnerable to event-loop starvation because of limited CPU, thermal throttling, and aggressive task batching. The fetch itself is not slow — the *callback* is delayed because the main thread is blocked by long tasks or microtask floods.
