@@ -414,8 +414,7 @@ These block:
 
 
 
-# Scenario_3:
-
+# Scenario_3 :
 **You have a Promise chain inside a for-loop of 10,000 items. Memory spikes and execution slows.
 How do you batch this using concurrency control?**
 
