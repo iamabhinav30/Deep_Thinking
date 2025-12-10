@@ -1,9 +1,11 @@
 # JavaScript Deep Thinking
 
 ### List of scenarios
-- [Scenario 1 : A user reports that your UI freezes when they click a button, but CPU usage stays low. You find a large async function. How do you break it using microtasks or macrotasks so UI stays responsive?](#scenario_1)
+- [Scenario_1 : A user reports that your UI freezes when they click a button, but CPU usage stays low. You find a large async function. How do you break it using microtasks or macrotasks so UI stays responsive?](#scenario_1)
 
 - [Question_1 : *Why* `setTimeout()` is a **macrotask** and `Promise.resolve()` is a microtask — without any fluff, no hallucination.](#question_1)
+
+- [Scenario 2 : A fetch call returns much slower only on Chrome Mobile. How do you profile the event loop + microtasks to find starvation?](scenaio_2)
 
 
 # Scenario_1 : 
@@ -259,10 +261,153 @@ Each cycle:
 5. Repeat
 ```
 
----
-
  🎯 **Final Level One-Line Answer**
 
 * `Promise.resolve()` goes into the microtask queue because the ES spec mandates that promise jobs run in the Job Queue.
 * `setTimeout()` goes into the macrotask queue because it is a Web API timer that schedules its callback for the next event-loop tick, after microtasks are drained.
+
+---
+
+
+
+# Scenario_2 :
+
+**A fetch call returns much slower only on Chrome Mobile. How do you profile the event loop + microtasks to find starvation?**
+
+Chrome Mobile is more vulnerable to event-loop starvation because of limited CPU, thermal throttling, and aggressive task batching. The fetch itself is not slow — the *callback* is delayed because the main thread is blocked by long tasks or microtask floods.
+
+ 1. Confirm Event-Loop Starvation Using Chrome Remote Debugging
+
+-  Connect phone → open `chrome://inspect`
+- Start a **Performance** recording on the mobile page
+- Trigger the slow fetch
+- Stop the recording
+
+Inspect:
+
+* **Long Tasks** (>50ms highlighted in yellow)
+* **Microtasks** panel (large blocks of Promise callbacks)
+* **Main Thread flamechart** (large JS chunks before fetch callback)
+
+If the fetch network timing is normal, but its callback runs only **after a Long Task**, starvation is confirmed.
+
+2. Instrument the Event Loop to Detect Blocking
+
+Add:
+
+```js
+let last = performance.now();
+
+function monitorEventLoop() {
+  const now = performance.now();
+  const delay = now - last;
+
+  if (delay > 50) {
+    console.warn(`Event loop blocked for ${delay.toFixed(2)}ms`);
+  }
+
+  last = now;
+  requestAnimationFrame(monitorEventLoop);
+}
+
+monitorEventLoop();
+```
+
+If you see spikes of 100ms–500ms → the UI thread is blocked, causing fetch callback delay.
+
+
+3. Detect Microtask Floods
+
+Instrument Promise chaining:
+
+```js
+const origThen = Promise.prototype.then;
+
+Promise.prototype.then = function(...args) {
+  console.count("microtask");
+  return origThen.apply(this, args);
+};
+```
+
+If logs explode into the thousands, you're dealing with a **microtask storm**:
+
+* React hydration
+* analytics SDK batching
+* repeated state updates
+* Promise-heavy libs
+
+A microtask storm blocks fetch callback execution.
+
+4. Detect Actual Fetch Callback Delay
+
+```js
+const t0 = performance.now();
+
+fetch(url).then(res => {
+  console.log("Fetch resolved after", performance.now() - t0, "ms");
+});
+```
+
+Compare:
+
+* Desktop Chrome → ~120ms
+* Mobile Chrome → fetch completes at ~120ms but callback fires at ~350–500ms
+  → **callback starvation**, not network slowness.
+
+
+
+5. Use Long Task Observer for Production Detection
+
+```js
+const observer = new PerformanceObserver(list => {
+  list.getEntries().forEach(entry => {
+    console.warn(`Long Task: ${entry.duration.toFixed(2)}ms at ${entry.startTime}`);
+  });
+});
+
+observer.observe({ entryTypes: ["longtask"] });
+```
+
+You will see:
+
+```
+Long Task: 232ms
+Long Task: 401ms
+```
+
+A fetch callback arriving during this time will stall until the long task finishes.
+
+6. What Typically Causes the Starvation
+
+* Heavy React hydration
+* Huge JSON parsing
+* Big array loops (map/filter/reduce)
+* Analytics scripts running microtask loops
+* Repeated Promise.resolve usage
+* Large synchronous rendering blocks
+* Polyfills on mobile JS engines
+
+These block:
+
+* microtask processing
+* macrotask processing
+* fetch callbacks
+* UI paint
+
+ 7. Final Answer
+
+> “Chrome Mobile fetch calls appear slow when the event loop is starved.
+> The network isn’t the issue—the callback is delayed because the main thread is blocked by long JS tasks or microtask floods.
+>
+> I debug this by:
+>
+> - Remote Chrome DevTools performance tracing,
+> - Checking Long Tasks + Microtask lane,
+> - Measuring event-loop delay via requestAnimationFrame,
+> - Instrumenting Promise.then to detect microtask storms, and
+> - Observing Long Tasks through PerformanceObserver.
+>
+> If the fetch resolves on time but the callback fires late, that confirms event-loop starvation.”
+
+---
 
