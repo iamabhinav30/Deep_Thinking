@@ -1,6 +1,13 @@
 # JavaScript Deep Thinking
 
-**Scenario 1 : A user reports that your UI freezes when they click a button, but CPU usage stays low. You find a large async function. How do you break it using microtasks or macrotasks so UI stays responsive?**
+### List of scenarios
+[Scenario 1 : A user reports that your UI freezes when they click a button, but CPU usage stays low. You find a large async function. How do you break it using microtasks or macrotasks so UI stays responsive?](#Scenario_1)
+
+[Scenario_1.1 : *Why* `setTimeout()` is a **macrotask** and `Promise.resolve()` is a microtask — without any fluff, no hallucination.](#Scenario_1.1)
+
+
+# Scenario_1 : 
+**A user reports that your UI freezes when they click a button, but CPU usage stays low. You find a large async function. How do you break it using microtasks or macrotasks so UI stays responsive?**
 
 ✅ **Answer: How to break a large async function using microtasks/macrotasks to keep UI responsive**
 
@@ -123,8 +130,8 @@ This is exactly how React Fiber and Vue Scheduler work internally.
 * To fix it, I chunk the workload and yield control back to the event loop using macrotasks (`setTimeout 0`) or microtasks (`Promise.resolve()`), allowing UI to repaint between chunks.”
 
 
-
-### **Here is the cleanest, explanation of *why* `setTimeout()` is a **macrotask** and `Promise.resolve()` is a microtask — without any fluff, no hallucination.**
+# Scenario_1.1
+**Here is the cleanest, explanation of *why* `setTimeout()` is a **macrotask** and `Promise.resolve()` is a microtask — without any fluff, no hallucination.**
 
 
 Because the **JavaScript event loop** has two different queues:
