@@ -7,6 +7,8 @@
 
 - [Scenario_2 : A fetch call returns much slower only on Chrome Mobile. How do you profile the event loop + microtasks to find starvation?](#scenario_2-)
 
+- [Scenario_3 : You have a promise chain inside a for-loop of 10,000 items. Memory spikes and execution slows. How do you batch this using concurrency control?](#scenario_3-)
+
 
 # Scenario_1 : 
 **A user reports that your UI freezes when they click a button, but CPU usage stays low. You find a large async function. How do you break it using microtasks or macrotasks so UI stays responsive?**
@@ -409,4 +411,220 @@ These block:
 > If the fetch resolves on time but the callback fires late, that confirms event-loop starvation.”
 
 ---
+
+
+
+# Scenario_3:
+
+**You have a Promise chain inside a for-loop of 10,000 items. Memory spikes and execution slows.
+How do you batch this using concurrency control?**
+
+**Answer** :
+
+🧠 *Why the slowdown happens*
+
+When you do something like:
+
+```js
+for (let i = 0; i < 10000; i++) {
+  doAsyncWork(i).then(...);
+}
+```
+
+You create:
+
+* 10,000 Promise objects
+* 10,000 microtasks
+* 10,000 pending async operations
+* 10,000 closures capturing loop variables
+
+This causes:
+
+❌ **Memory explosion**
+
+Active promises sit in memory until resolved.
+
+❌ **Microtask starvation**
+
+Huge microtask queues delay UI + timers + fetch callbacks.
+
+❌ **Event-loop congestion**
+
+JS tries to run too many promise callbacks at once.
+
+ ❌ **Network/API overload**
+
+If operations hit APIs, you DDOS your own backend.
+
+🎯 **Goal: Limit concurrency**
+
+→ Only run *N tasks at a time* until all 10,000 are processed.
+
+This is called **Concurrency Control**.
+
+Industry standard concurrency = **5, 10, or 20**.
+
+ ⭐ Solution 1: **Batch processing (Chunking)** 
+Run tasks in chunks of fixed size.
+
+ ✔️ Example: Batch size = 100
+
+```js
+async function batchProcess(items, batchSize = 100) {
+  for (let i = 0; i < items.length; i += batchSize) {
+    const batch = items.slice(i, i + batchSize);
+
+    await Promise.all(
+      batch.map(item => doAsyncWork(item))
+    );
+
+    console.log(`Batch ${i / batchSize + 1} done`);
+  }
+}
+```
+
+### 👍 What this gives you:
+
+* Only 100 promises in memory at a time
+* Event loop stays responsive
+* Microtask queue small
+* Super predictable performance
+* Backpressure-friendly
+
+### Perfect for:
+
+* Database reads
+* API calls
+* File uploads
+* Any async IO
+
+
+ ⭐ Solution 2: **True Concurrency Control (Pool of Workers)** 
+This is more advanced than batching — more efficient, too.
+
+### We maintain a “pool” of N active tasks
+
+When one finishes → we start another.
+
+## ✔️ Concurrency pool example (limit = 5)
+
+```js
+async function runWithConcurrencyLimit(tasks, limit = 5) {
+  let index = 0;
+  const results = [];
+  const active = [];
+
+  const execute = async () => {
+    if (index >= tasks.length) return;
+
+    const taskIndex = index++;
+    const p = tasks[taskIndex]().then(result => {
+      results[taskIndex] = result;
+      active.splice(active.indexOf(p), 1);
+    });
+
+    active.push(p);
+
+    if (active.length >= limit) {
+      await Promise.race(active); // wait for any one to finish
+    }
+
+    return execute();
+  };
+
+  await execute();
+  await Promise.all(active);
+
+  return results;
+}
+```
+
+### Using it:
+
+```js
+const tasks = items.map(item => () => doAsyncWork(item));
+runWithConcurrencyLimit(tasks, 5).then(console.log);
+```
+
+---
+
+# 🧠 Why concurrency pooling is superior:
+
+(Better than batching)
+
+| Feature                    | Batching    | Concurrency Pool |
+| -------------------------- | ----------- | ---------------- |
+| Fixed batch size           | Yes         | No               |
+| Utilizes idle gaps         | ❌ No        | ✔️ Yes           |
+| Maximizes throughput       | ❌ Often not | ✔️ Yes           |
+| Avoids memory spikes       | ✔️ Yes      | ✔️ Yes           |
+| Perfect for large datasets | 👍 Good     | 🔥 Best          |
+
+
+⭐ Solution 3: Using **p-limit** (industry standard)
+
+NPM package widely used at Google, Meta, AWS.
+
+```js
+import pLimit from 'p-limit';
+
+const limit = pLimit(10);
+
+const promises = items.map(item =>
+  limit(() => doAsyncWork(item))
+);
+
+const results = await Promise.all(promises);
+```
+
+### Amazing benefits:
+
+* Exactly 10 tasks running at any time
+* Zero memory spikes
+* Minimal microtask overhead
+* Cleanest code
+
+
+
+⭐ Solution 4: Using **for-await-of** (natural concurrency control)
+
+```js
+async function* taskGenerator(items) {
+  for (const item of items) {
+    yield doAsyncWork(item);
+  }
+}
+
+for await (const result of taskGenerator(items)) {
+  console.log(result);
+}
+```
+
+Concurrency = **1** by default → no overload.
+
+
+
+🚀 Final Answer
+
+> “Running 10,000 async operations in a loop creates massive numbers of Promises and microtasks, causing memory spikes and event-loop starvation.
+> To fix this, I use concurrency control: instead of running 10,000 tasks at once, I run them in batches or with a concurrency pool.
+>
+> The most efficient technique is maintaining a pool of N active tasks.
+> When one task completes, I start the next one until all tasks finish.
+>
+> This prevents memory bloat, avoids microtask storms, keeps the event loop responsive, and improves throughput.”
+
+
+
+⚡ *Ultra-Simple Summary*
+
+**Problem:**
+10,000 promises = memory spike + slow execution.
+
+**Fix:**
+Run **5–10 at a time** using:
+
+✔ Batch processing
+✔ Concurrency pool
+✔ `p-limit`
 
