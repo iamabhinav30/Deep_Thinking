@@ -1,21 +1,32 @@
 # JavaScript Deep Thinking
 
 ### List of scenarios
-[Scenario 1 : A user reports that your UI freezes when they click a button, but CPU usage stays low. You find a large async function. How do you break it using microtasks or macrotasks so UI stays responsive?](#Scenario_1)
+- [Scenario 1 : A user reports that your UI freezes when they click a button, but CPU usage stays low. You find a large async function. How do you break it using microtasks or macrotasks so UI stays responsive?](#scenario_1)
 
-[Scenario_1.1 : *Why* `setTimeout()` is a **macrotask** and `Promise.resolve()` is a microtask — without any fluff, no hallucination.](#Scenario_1.1)
+- [Question_1 : *Why* `setTimeout()` is a **macrotask** and `Promise.resolve()` is a microtask — without any fluff, no hallucination.](#question_1)
 
 
 # Scenario_1 : 
 **A user reports that your UI freezes when they click a button, but CPU usage stays low. You find a large async function. How do you break it using microtasks or macrotasks so UI stays responsive?**
 
-✅ **Answer: How to break a large async function using microtasks/macrotasks to keep UI responsive**
+**Answer: How to break a large async function using microtasks/macrotasks to keep UI responsive**
 
 If your UI freezes even though CPU is low, it means:
 
  🔥 The JS *event loop is blocked* by long-running synchronous work inside an async function.
 
-Even if a function is `async`, **any synchronous block inside it still blocks the main thread**.
+Even if a function is `async`, **any synchronous block inside it still blocks the main thread**. The async keyword does NOT make the function non-blocking.
+Inside it, if you run synchronous heavy loops:
+
+* Browser cannot repaint
+
+* Cannot process clicks
+
+* UI becomes unresponsive
+
+* CPU stays low because browser is idle waiting for JS to finish
+
+* Root cause : JavaScript is single-threaded, and long synchronous work blocks the main thread, freezing UI.
 
 To fix this, you break the work into **small tasks** using:
 
@@ -23,7 +34,7 @@ To fix this, you break the work into **small tasks** using:
 
 This is the safest way.
 
-### ❌ WRONG – long loop blocks UI
+**WRONG – long loop blocks UI**
 
 ```js
 async function processLargeList(list) {
@@ -110,15 +121,15 @@ async function processLargeJob(items) {
 JavaScript runs on a **single thread**:
 
 * If you run heavy synchronous work → UI freezes
-* UI painting happens only **between macrotasks**
+* UI painting happens only **between macrotasks** or UI only re-renders between macrotasks
 * So breaking work lets browser repaint, handle clicks, and keep animations smooth
 
 Using chunking with async breaks lets the event loop:
 
- 1. Process user input
- 2. Render UI frame
- 3. Continue your work
- 4. Repeat
+ - Process user input
+ - Render UI frame
+ - Continue your work
+ - Repeat
 
 This is exactly how React Fiber and Vue Scheduler work internally.
 
@@ -130,7 +141,7 @@ This is exactly how React Fiber and Vue Scheduler work internally.
 * To fix it, I chunk the workload and yield control back to the event loop using macrotasks (`setTimeout 0`) or microtasks (`Promise.resolve()`), allowing UI to repaint between chunks.”
 
 
-# Scenario_1.1
+# Question_1
 **Here is the cleanest, explanation of *why* `setTimeout()` is a **macrotask** and `Promise.resolve()` is a microtask — without any fluff, no hallucination.**
 
 
@@ -165,10 +176,10 @@ The **spec** defines them separately — they are not interchangeable.
 
 What it does:
 
-1. You call `setTimeout(callback, 0)`
-2. Browser timer finishes
-3. Browser puts `callback` into the **macrotask queue**
-4. Event loop picks it up **only after:**
+- You call `setTimeout(callback, 0)`
+- Browser timer finishes
+- Browser puts `callback` into the **macrotask queue**
+- Event loop picks it up **only after:**
 
    * current call stack finishes
    * **all microtasks finish**
@@ -254,6 +265,4 @@ Each cycle:
 
 * `Promise.resolve()` goes into the microtask queue because the ES spec mandates that promise jobs run in the Job Queue.
 * `setTimeout()` goes into the macrotask queue because it is a Web API timer that schedules its callback for the next event-loop tick, after microtasks are drained.
-
-
 
