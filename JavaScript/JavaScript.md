@@ -1,11 +1,11 @@
 # JavaScript Deep Thinking
 
 ### List of scenarios
-- [Scenario_1 : A user reports that your UI freezes when they click a button, but CPU usage stays low. You find a large async function. How do you break it using microtasks or macrotasks so UI stays responsive?](#scenario_1)
+- [Scenario_1 : A user reports that your UI freezes when they click a button, but CPU usage stays low. You find a large async function. How do you break it using microtasks or macrotasks so UI stays responsive?](#scenario_1-)
 
 - [Question_1 : *Why* `setTimeout()` is a **macrotask** and `Promise.resolve()` is a microtask — without any fluff, no hallucination.](#question_1)
 
-- [Scenario_2 : A fetch call returns much slower only on Chrome Mobile. How do you profile the event loop + microtasks to find starvation?](#scenario_2)
+- [Scenario_2 : A fetch call returns much slower only on Chrome Mobile. How do you profile the event loop + microtasks to find starvation?](#scenario_2-)
 
 
 # Scenario_1 : 
