@@ -633,8 +633,7 @@ Run **5–10 at a time** using:
 
 
 # Scenario_4 :
-**You have a Promise chain inside a for-loop of 10,000 items. Memory spikes and execution slows.
-How do you batch this using concurrency control?**
+**Your timer-based polling drifts over time by 20–30 seconds. Why does this happen, and how do you design a drift-free scheduler?**
 
 **Answer** :
 Here is **the complete, beginner-to-expert explanation** of:
