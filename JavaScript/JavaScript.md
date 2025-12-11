@@ -642,7 +642,6 @@ Here is **the complete, beginner-to-expert explanation** of:
 * What drift is
 * Why timers drift
 * How to design a **drift-free scheduler**
-* PLUS a **FAANG-level answer** for interviews
 
 I’ll explain everything step-by-step so it becomes crystal clear.
 
@@ -747,14 +746,11 @@ but if the event loop is busy → fn waits
 
 So delays accumulate.
 
-
-
  3️⃣ **JavaScript is single-threaded**
 
 Timers depend on the main thread.
 
 If the main thread is busy → your timer is late.
-
 
 
  4️⃣ **Mobile throttling**
@@ -766,8 +762,6 @@ Chrome Mobile aggressively slows timers to save battery.
 ```
 1300ms, 1500ms, 2000ms, etc.
 ```
-
-
 
  🧨 **Real problem**
 
@@ -810,7 +804,6 @@ We don’t schedule:
 Instead, we schedule:
 
 > “Run at the EXACT REAL timestamp it should run.”
-
 
 
 ✔️ **THE DRIFT-FREE SOLUTION**
@@ -890,10 +883,10 @@ Drift = **zero**.
 
 > “Timer drift happens because JavaScript timers (`setInterval`, `setTimeout`) do not run precisely at the requested times.
 > The event loop, microtask queue, long tasks, garbage collection, and mobile CPU throttling delay the timer execution, causing the polling interval to slowly shift by seconds or even minutes.
->
+
 > To eliminate this, I use a drift-free scheduler.
 > Instead of scheduling ‘run after X ms’, I schedule ‘run at the exact real time the next tick should occur’ and adjust for drift.
->
+
 > This ensures that even if one invocation is delayed, the overall schedule stays aligned with true time and never accumulates drift.”
 
 
