@@ -9,7 +9,7 @@
 
 - [Scenario_3 : You have a promise chain inside a for-loop of 10,000 items. Memory spikes and execution slows. How do you batch this using concurrency control?](#scenario_3-)
 
-- [](#scenario_4-)
+- [Scenario_4 : Your timer-based polling drifts over time by 20–30 seconds. Why does this happen, and how do you design a drift-free scheduler?](#scenario_4-)
 
 
 # Scenario_1 : 
