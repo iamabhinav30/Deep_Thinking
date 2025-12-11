@@ -906,7 +906,7 @@ Drift = **zero**.
 ---
 
 
-#Scenario_5 : 
+# Scenario_5 : 
 **A UI click handler triggers a reflow at the wrong time due to microtasks. How do you reorder tasks to avoid layout thrashing??**
 
 **Answer** :
