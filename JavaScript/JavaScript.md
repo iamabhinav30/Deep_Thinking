@@ -633,6 +633,10 @@ Run **5–10 at a time** using:
 
 
 # Scenario_4 :
+**You have a Promise chain inside a for-loop of 10,000 items. Memory spikes and execution slows.
+How do you batch this using concurrency control?**
+
+**Answer** :
 Here is **the complete, beginner-to-expert explanation** of:
 
 * What polling is
