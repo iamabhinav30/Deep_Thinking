@@ -15,6 +15,58 @@
 
 - [Scenario_5 : A UI click handler triggers a reflow at the wrong time due to microtasks. How do you reorder tasks to avoid layout thrashing??](#scenario_5-)
 
+### Memory, GC, Performance
+
+[Scenario_6 :  A React dashboard gets progressively slower after 2 hours. Memory heap keeps growing. How do you detect and fix closures retaining stale references?](#scenario_-)
+
+[Scenario_ : ](#scenario_-)
+You implemented an event listener for scroll tracking, but users see stuttering. How do you use passive listeners + throttling to fix it?
+
+[Scenario_ : ](#scenario_-)
+A WebSocket stream is dropping messages due to the JS thread blocking. What profiles or techniques help you identify blocking operations?
+
+[Scenario_ : ](#scenario_-)
+A large array (50k items) must be filtered + mapped repeatedly. How do you optimize using transducers or lazy evaluation?
+
+[Scenario_ : ](#scenario_-)
+You discover a memory leak caused by a WeakMap or WeakRef misuse. Explain how you debug it.
+
+11–15: Deep JS Concepts in Real Apps
+
+[Scenario_ : ](#scenario_-) A senior says “avoid deep cloning inside render.” Why? What alternatives do you use?
+
+[Scenario_ : ](#scenario_-) A user complains that currency formatting is wrong for some locales. Explain the Intl API and how to ensure consistent behavior across browsers.
+
+[Scenario_ : ](#scenario_-) You have two async APIs that must run sequentially but share state. How do you avoid race conditions without mutex libraries?
+
+[Scenario_ : ](#scenario_-)Your code depends on dynamic imports. On slow networks, hydration breaks. How do you design a fallback system?
+
+[Scenario_ : ](#scenario_-) A secure page needs deterministic random numbers. How do you design this safely without Math.random()?
+
+### DOM, Browser, Rendering
+
+[Scenario_ : ](#scenario_-) A massive table (20k rows) lags during scroll. How do you virtualize rendering?
+
+[Scenario_ : ](#scenario_-) A feature uses ResizeObserver but causes infinite loops. Why does this happen and how do you architect around it?
+
+[Scenario_ : ](#scenario_-) You need to track user session expiry without timers. How do you rely on browser APIs/events?
+
+[Scenario_ : ](#scenario_-) Your service worker caches too aggressively and users see stale content. How do you design a cache-busting strategy?
+
+[Scenario_ : ](#scenario_-) A large enterprise app needs sandboxed script execution. How do you build a secure iframe communication model?
+
+Architecture-Level JS Questions
+
+[Scenario_ : ](#scenario_-) Design a plugin architecture for a multi-brand frontend platform using pure JS.
+
+[Scenario_ : ](#scenario_-) Multi-step form: data must persist across reloads, but encryption is required. How do you design it?
+
+[Scenario_ : ](#scenario_-) Explain how you detect and fix hydration mismatches in an SSR environment using JS debugging.
+
+[Scenario_ : ](#scenario_-) You have a huge config-driven UI (forms, widgets). How do you design a scalable schema + renderer in JS?
+
+[Scenario_ : ](#scenario_-) A fintech app processes sensitive computations. How do you prevent timing attacks in JS?
+
 # Scenario_1 : 
 **A user reports that your UI freezes when they click a button, but CPU usage stays low. You find a large async function. How do you break it using microtasks or macrotasks so UI stays responsive?**
 
